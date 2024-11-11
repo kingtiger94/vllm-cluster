@@ -1,0 +1,12 @@
+apiVersion: v1
+kind: Service
+metadata:
+  name: vllm-head-service
+  namespace: vllm-cluster
+spec:
+  selector:
+    app: vllm-head
+  ports:
+    - protocol: TCP
+      port: 6379
+      targetPort: 6379

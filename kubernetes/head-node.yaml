@@ -1,0 +1,41 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: vllm-head
+  namespace: vllm-cluster
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: vllm-head
+  template:
+    metadata:
+      labels:
+        app: vllm-head
+    spec:
+      affinity:
+        nodeAffinity:
+          requiredDuringSchedulingIgnoredDuringExecution:
+            nodeSelectorTerms:
+              - matchExpressions:
+                - key: role
+                  operator: In
+                  values:
+                    - master
+      containers:
+        - name: vllm-head
+          image: calm329/vllm
+          ports:
+            - containerPort: 6379  # Ray head node port
+            - containerPort: 8000  # vLLM serving port
+          resources:
+            limits:
+              nvidia.com/gpu: 1  # Adjust based on available GPUs on the master node
+          volumeMounts:
+            - mountPath: /root/.cache/huggingface
+              name: huggingface-cache
+          command: ["/bin/sh", "-c", "ray start --head --port=6379 --block && tail -f /dev/null"]
+      volumes:
+        - name: huggingface-cache
+          hostPath:
+            path: /home/ubuntu/huggingface/cache

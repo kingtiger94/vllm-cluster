@@ -1,0 +1,40 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: vllm-worker-1
+  namespace: vllm-cluster 
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: vllm-worker-1
+  template:
+    metadata:
+      labels:
+        app: vllm-worker-1
+    spec:
+      affinity:
+        nodeAffinity:
+          requiredDuringSchedulingIgnoredDuringExecution:
+            nodeSelectorTerms:
+              - matchExpressions:
+                - key: role
+                  operator: In
+                  values:
+                    - worker-1  # Only runs on worker node with label 'role=worker-1'
+      containers:
+        - name: vllm-worker
+          image: calm329/vllm-mistral
+          ports:
+            - containerPort: 8000  # vLLM serving port
+          resources:
+            limits:
+              nvidia.com/gpu: 1  # Adjust based on available GPUs
+          volumeMounts:
+            - mountPath: /root/.cache/huggingface
+              name: huggingface-cache
+          command: ["/bin/sh", "-c", "ray start --address=vllm-head-service:6379 --block"]
+      volumes:
+        - name: huggingface-cache
+          hostPath:
+            path: /home/ubuntu/huggingface/cache
