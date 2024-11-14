@@ -24,7 +24,7 @@ spec:
                     - master
       containers:
         - name: vllm-head
-          image: calm329/vllm
+          image: calm329/vllm-mistral-7b-instruct-v0.3
           ports:
             - containerPort: 6379  # Ray head node port
             - containerPort: 8000  # vLLM serving port
