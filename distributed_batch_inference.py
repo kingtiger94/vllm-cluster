@@ -21,10 +21,10 @@ assert Version(ray.__version__) >= Version(
 sampling_params = SamplingParams(temperature=0.8, top_p=0.95)
 
 # Set tensor parallelism per instance.
-tensor_parallel_size = 1
+tensor_parallel_size = 2
 
 # Set number of instances. Each instance will use tensor_parallel_size GPUs.
-num_instances = 2
+num_instances = 1
 
 
 # Create a class to do batch inference.
